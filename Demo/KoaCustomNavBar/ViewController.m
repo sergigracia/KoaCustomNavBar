@@ -25,9 +25,6 @@
  
     [(KoaCustomNavBar *)self.navigationController.navigationBar setTitle:@"New Task"];
     
-//    [(KoaCustomNavBar *)self.navigationController.navigationBar setLeftButtonWithFontAwesomeIcon:@"icon-reorder" target:nil action:nil];
-//    [(KoaCustomNavBar *)self.navigationController.navigationBar setRightButtonWithText:@"Save" target:nil action:nil];
-    
     [(KoaCustomNavBar *)self.navigationController.navigationBar setRightButtonWithText:@"Save" textColor:[UIColor whiteColor] target:self action:@selector(aloha) withSize:CGSizeMake(66, 44)
                                                                     withGradientColorTop:[UIColor colorWithRed:64/255.f green:169/255.f blue:212/255.f alpha:1]
                                                                      andGradientColorBottom:[UIColor colorWithRed:45/255.f green:138/255.f blue:180/255.f alpha:1]];
@@ -37,11 +34,6 @@
                                                                      andGradientColorBottom:[UIColor colorWithRed:79/255.f green:79/255.f blue:79/255.f alpha:1]];
     
     [(KoaCustomNavBar *)self.navigationController.navigationBar addBottomBarWithBarHeight:2 barColor:[UIColor colorWithRed:85/255.f green:85/255.f blue:85/255.f alpha:0.2]];
-}
-
-- (void)aloha
-{
-    [(KoaCustomNavBar *)self.navigationController.navigationBar removeBottomBar];
 }
 
 - (void)didReceiveMemoryWarning
