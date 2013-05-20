@@ -37,19 +37,20 @@
     
     //Title
     [(KoaCustomNavBar *)navigationController.navigationBar setTitleTextFont:[UIFont fontWithName:@"OpenSans-Semibold" size:16]];
-    [(KoaCustomNavBar *)navigationController.navigationBar setButtonsTextFont:[UIFont fontWithName:@"OpenSans-Semibold" size:16]];
+    [(KoaCustomNavBar *)navigationController.navigationBar setButtonsTextFont:[UIFont fontWithName:@"OpenSans-Bold" size:13]];
+    [(KoaCustomNavBar *)navigationController.navigationBar setTitleMinimumFontSize:14];
     //[(KoaCustomNavBar *)navigationController.navigationBar setTitleMinimumFontSize:12];
     //[(KoaCustomNavBar *)navigationController.navigationBar setFontAwesomeIconsSize:28];
     
     //Background
-    [(KoaCustomNavBar *)navigationController.navigationBar setBackgroundGradientWithColor1:[UIColor colorWithRed:0.298 green:0.298 blue:0.298 alpha:1]
-                                                                                 andColor2:[UIColor colorWithRed:0.231 green:0.231 blue:0.231 alpha:1]];
+    [(KoaCustomNavBar *)navigationController.navigationBar setBackgroundGradientWithColorTop:[UIColor colorWithRed:0.298 green:0.298 blue:0.298 alpha:1]
+                                                                                 andColorBottom:[UIColor colorWithRed:0.231 green:0.231 blue:0.231 alpha:1]];
 }
 
 - (void)changeColor
 {
     NSLog(@"ChangeColor!");
-    [(KoaCustomNavBar *)self.window.rootViewController.navigationController.navigationBar setBackgroundGradientWithColor1:[UIColor redColor] andColor2:[UIColor greenColor]];
+    [(KoaCustomNavBar *)self.window.rootViewController.navigationController.navigationBar setBackgroundGradientWithColorTop:[UIColor redColor] andColorBottom:[UIColor greenColor]];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

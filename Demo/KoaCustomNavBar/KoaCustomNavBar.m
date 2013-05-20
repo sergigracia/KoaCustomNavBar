@@ -10,7 +10,7 @@
 #import "NSString+FontAwesome.h"
 #import "UIFont+FontAwesome.h"
 
-#define kTitleVerticalMargin 5
+#define kTitleVerticalMargin 4
 #define kMinimumWithButtonsMargin 200
 
 @implementation KoaCustomNavBar
@@ -35,7 +35,6 @@
     return self;
 }
 
-
 - (id)init
 {
     self = [super init];
@@ -49,12 +48,12 @@
 {
     NSLog(@"Init navBar!!!");
 
-    if (!self.gradientColor1) {
-        self.gradientColor1 = [UIColor colorWithRed:0.498 green:0.498 blue:0.498 alpha:1];
+    if (!self.gradientColorTop) {
+        self.gradientColorTop = [UIColor colorWithRed:0.498 green:0.498 blue:0.498 alpha:1];
     }
 
-    if (!self.gradientColor2) {
-        self.gradientColor2 = [UIColor colorWithRed:0.231 green:0.231 blue:0.231 alpha:1];
+    if (!self.gradientColorBottom) {
+        self.gradientColorBottom = [UIColor colorWithRed:0.231 green:0.231 blue:0.231 alpha:1];
     }
     
     if (!self.titleFont) {
@@ -77,50 +76,22 @@
     [self setButtonsTextFont:self.buttonsFont];
 }
 
-#pragma mark - Setters
+#pragma mark - Customize
 
-- (void)setTitle:(NSString *)title
+
+
+- (void)addBottomBarWithBarHeight:(int)barHeight barColor:(UIColor *)barColor
 {
-    self.topItem.titleView = nil;
+    self.bottomBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, barHeight)];
     
-    int leftButtonWidth = kMinimumWithButtonsMargin;
-    int rightButtonWidth = kMinimumWithButtonsMargin;
+    [self.bottomBar setBackgroundColor:barColor];
     
-    if ([self.topItem.leftBarButtonItems objectAtIndex:1]) {
-        if ([[self.topItem.leftBarButtonItems objectAtIndex:1] isKindOfClass:[UIBarButtonItem class]]) {
-            leftButtonWidth = ((UIBarButtonItem *)[self.topItem.leftBarButtonItems objectAtIndex:1]).customView.frame.size.width;
-        }
-    }
-    
-    if ([self.topItem.rightBarButtonItems objectAtIndex:1]) {
-        if ([[self.topItem.rightBarButtonItems objectAtIndex:1] isKindOfClass:[UIBarButtonItem class]]) {
-            rightButtonWidth = ((UIBarButtonItem *)[self.topItem.rightBarButtonItems objectAtIndex:1]).customView.frame.size.width;
-        }
-    }
-    
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(self.topItem.leftBarButtonItem.customView.frame.origin.x + self.topItem.leftBarButtonItem.customView.frame.size.width,
-                                                                        0 + kTitleVerticalMargin,
-                                                                        self.frame.size.width - leftButtonWidth - rightButtonWidth,
-                                                                        self.frame.size.height - kTitleVerticalMargin*2)];
-    [label setFont:self.titleFont];
+    [self insertSubview:self.bottomBar aboveSubview:self];
+}
 
-    [label setNumberOfLines:2];
-    
-    [label setBackgroundColor:[UIColor clearColor]];
-    
-    [label setTextColor:[UIColor whiteColor]];
-    
-    [label setTextAlignment:NSTextAlignmentCenter];
-    
-    [label setFont:[self getFontForString:title toFitInRect:label.frame seedFont:label.font]];
-
-    if (label.font.pointSize < self.titleMinimumFontSize) {
-        [label setFont:[UIFont fontWithName:label.font.fontName size:self.titleMinimumFontSize]];
-    }
-    
-    [label setText:title];
-    
-    [self.topItem setTitleView:label];
+- (void)removeBottomBar
+{
+    [self.bottomBar removeFromSuperview];
 }
 
 - (void)setTitleTextFont:(UIFont *)font
@@ -146,81 +117,195 @@
 
 - (void)setBackgroundWithColor:(UIColor *)color
 {
-    self.gradientColor1 = color;
-    self.gradientColor2 = color;
+    self.gradientColorTop = color;
+    self.gradientColorBottom = color;
 }
 
-- (void)setBackgroundGradientWithColor1:(UIColor *)color1 andColor2:(UIColor *)color2
+- (void)setBackgroundGradientWithColorTop:(UIColor *)colorTop andColorBottom:(UIColor *)colorBottom
 {
-    self.gradientColor1 = color1;
-    self.gradientColor2 = color2;
+    self.gradientColorTop = colorTop;
+    self.gradientColorBottom = colorBottom;
+}
+
+#pragma mark - Title
+- (void)setTitle:(NSString *)title
+{
+    [self setTitle:title textColor:[UIColor whiteColor]];
+}
+
+- (void)setTitle:(NSString *)title textColor:(UIColor *)textColor
+{
+    self.topItem.titleView = nil;
+    
+    int widthButton = kMinimumWithButtonsMargin;
+    
+    if ([self.topItem.leftBarButtonItems objectAtIndex:1]) {
+        if ([[self.topItem.leftBarButtonItems objectAtIndex:1] isKindOfClass:[UIBarButtonItem class]]) {
+            if (((UIBarButtonItem *)[self.topItem.leftBarButtonItems objectAtIndex:1]).customView.frame.size.width > widthButton) {
+                widthButton = ((UIBarButtonItem *)[self.topItem.leftBarButtonItems objectAtIndex:1]).customView.frame.size.width;
+            }
+        }
+    }
+    
+    if ([self.topItem.rightBarButtonItems objectAtIndex:1]) {
+        if ([[self.topItem.rightBarButtonItems objectAtIndex:1] isKindOfClass:[UIBarButtonItem class]]) {
+            if (((UIBarButtonItem *)[self.topItem.rightBarButtonItems objectAtIndex:1]).customView.frame.size.width > widthButton) {
+                widthButton = ((UIBarButtonItem *)[self.topItem.rightBarButtonItems objectAtIndex:1]).customView.frame.size.width;
+            }
+        }
+    }
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(self.topItem.leftBarButtonItem.customView.frame.origin.x + widthButton, 0,
+                                                               self.frame.size.width - widthButton*2,
+                                                               self.frame.size.height - kTitleVerticalMargin*2)];
+    
+    [label setFont:self.titleFont];
+    
+    [label setNumberOfLines:2];
+    
+    [label setBackgroundColor:[UIColor clearColor]];
+    
+    [label setTextColor:textColor];
+    
+    [label setTextAlignment:NSTextAlignmentCenter];
+    
+    //[label setBackgroundColor:[UIColor redColor]];
+    
+    [label setFont:[self getFontForString:title toFitInRect:label.frame seedFont:label.font]];
+    
+    if (label.font.pointSize < self.titleMinimumFontSize) {
+        [label setFont:[UIFont fontWithName:label.font.fontName size:self.titleMinimumFontSize]];
+    }
+    
+    [label setText:title];
+    
+    [self.topItem setTitleView:label];
 }
 
 #pragma mark - Buttons + Text
 
-- (void)setLeftButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action
+- (void)setLeftButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action
 {
-    [self setLeftButtonWithText:buttonText target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
+    [self setLeftButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
 }
 
-- (void)setRightButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action
+- (void)setRightButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action
 {
-    [self setRightButtonWithText:buttonText target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
+    [self setRightButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
 }
 
-- (void)setLeftButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (void)setLeftButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize
 {
     //Remove previous button
     self.topItem.leftBarButtonItem = nil;
     self.topItem.leftBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithText:buttonText target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Add button
     [self setLeftButton:button];
 }
 
-- (void)setRightButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (void)setRightButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize
 {
     //Remove previous button
     self.topItem.rightBarButtonItem = nil;
     self.topItem.rightBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithText:buttonText target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Add button
     [self setRightButton:button];
 }
 
-- (void)setLeftButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColor1:(UIColor *)color1 andGradientColor2:(UIColor *)color2
+- (void)setLeftButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Remove previous button
     self.topItem.leftBarButtonItem = nil;
     self.topItem.leftBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithText:buttonText target:target action:action withFrame:buttonFrame];
-
-    //Apply gradient color
-    [self drawBackgroundGradientInButton:button withColor1:color1 andColor2:color2];
-
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:buttonFrame];
+    
     //Add button
     [self setLeftButton:button];
 }
 
-- (void)setRightButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColor1:(UIColor *)color1 andGradientColor2:(UIColor *)color2
+- (void)setRightButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Remove previous button
     self.topItem.rightBarButtonItem = nil;
     self.topItem.rightBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithText:buttonText target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:buttonFrame];
+    
+    //Add button
+    [self setRightButton:button];
+}
+
+- (void)setLeftButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.leftBarButtonItem = nil;
+    self.topItem.leftBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Apply gradient color
-    [self drawBackgroundGradientInButton:button withColor1:color1 andColor2:color2];
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+    
+    //Add button
+    [self setLeftButton:button];
+}
+
+- (void)setRightButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.rightBarButtonItem = nil;
+    self.topItem.rightBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
+    
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+    
+    //Add button
+    [self setRightButton:button];
+}
+
+
+- (void)setLeftButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.leftBarButtonItem = nil;
+    self.topItem.leftBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:buttonFrame];
+
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+
+    //Add button
+    [self setLeftButton:button];
+}
+
+- (void)setRightButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.rightBarButtonItem = nil;
+    self.topItem.rightBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithText:buttonText textColor:textColor target:target action:action withFrame:buttonFrame];
+    
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
     
     //Add button
     [self setRightButton:button];
@@ -228,69 +313,127 @@
 
 #pragma mark - Buttons + FontAwesome
 
-- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action
+- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action
 {
-    [self setLeftButtonWithFontAwesomeIcon:iconName target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
+    [self setLeftButtonWithFontAwesomeIcon:iconName textColor:(UIColor *)textColor target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
 }
 
-- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action
+- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action
 {
-    [self setRightButtonWithFontAwesomeIcon:iconName target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
+    [self setRightButtonWithFontAwesomeIcon:iconName textColor:(UIColor *)textColor target:target action:action withFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
 }
 
-- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize
 {
     //Remove previous button
     self.topItem.leftBarButtonItem = nil;
     self.topItem.leftBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithFontAwesome:iconName target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Add button
     [self setLeftButton:button];
 }
 
-- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize
 {
     //Remove previous button
     self.topItem.rightBarButtonItem = nil;
     self.topItem.rightBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithFontAwesome:iconName target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Add button
     [self setRightButton:button];
 }
 
-- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColor1:(UIColor *)color1 andGradientColor2:(UIColor *)color2
+- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Remove previous button
     self.topItem.leftBarButtonItem = nil;
     self.topItem.leftBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithFontAwesome:iconName target:target action:action withFrame:buttonFrame];
-    
-    //Apply gradient color
-    [self drawBackgroundGradientInButton:button withColor1:color1 andColor2:color2];
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:buttonFrame];
     
     //Add button
     [self setLeftButton:button];
 }
 
-- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColor1:(UIColor *)color1 andGradientColor2:(UIColor *)color2
+- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Remove previous button
     self.topItem.rightBarButtonItem = nil;
     self.topItem.rightBarButtonItems = nil;
     
     //Get button
-    UIButton *button = [self getButtonWithFontAwesome:iconName target:target action:action withFrame:buttonFrame];
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:buttonFrame];
+    
+    //Add button
+    [self setRightButton:button];
+}
+
+- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.leftBarButtonItem = nil;
+    self.topItem.leftBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
     
     //Apply gradient color
-    [self drawBackgroundGradientInButton:button withColor1:color1 andColor2:color2];
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+    
+    //Add button
+    [self setLeftButton:button];
+}
+
+- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withSize:(CGSize)buttonSize withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.rightBarButtonItem = nil;
+    self.topItem.rightBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:CGRectMake(0, 0, buttonSize.width, buttonSize.height)];
+    
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+    
+    //Add button
+    [self setRightButton:button];
+}
+
+- (void)setLeftButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.leftBarButtonItem = nil;
+    self.topItem.leftBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:buttonFrame];
+    
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
+    
+    //Add button
+    [self setLeftButton:button];
+}
+
+- (void)setRightButtonWithFontAwesomeIcon:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame withGradientColorTop:(UIColor *)colorTop andGradientColorBottom:(UIColor *)colorBottom
+{
+    //Remove previous button
+    self.topItem.rightBarButtonItem = nil;
+    self.topItem.rightBarButtonItems = nil;
+    
+    //Get button
+    UIButton *button = [self getButtonWithFontAwesome:iconName textColor:textColor target:target action:action withFrame:buttonFrame];
+    
+    //Apply gradient color
+    [self drawBackgroundGradientInButton:button withColorTop:colorTop andColorBottom:colorBottom];
     
     //Add button
     [self setRightButton:button];
@@ -334,13 +477,16 @@
     }
 }
 
-- (UIButton *)getButtonWithText:(NSString *)buttonText target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (UIButton *)getButtonWithText:(NSString *)buttonText textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Define button
     UIButton *button = [[UIButton alloc] initWithFrame:buttonFrame];
     
     //Set font
     [button.titleLabel setFont:self.buttonsFont];
+    
+    //Set textColor
+    [button setTitleColor:textColor forState:UIControlStateNormal];
     
     //Set text
     [button setTitle:buttonText forState:UIControlStateNormal];
@@ -349,12 +495,12 @@
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
     
     //Padding button
-    [button setFrame:CGRectMake(button.frame.origin.x, button.frame.origin.y, button.titleLabel.frame.size.width + 17*2, button.frame.size.height)];
+    [button setFrame:CGRectMake(button.frame.origin.x, button.frame.origin.y, buttonFrame.size.width, button.frame.size.height)];
 
     return button;
 }
 
-- (UIButton *)getButtonWithFontAwesome:(NSString *)iconName target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
+- (UIButton *)getButtonWithFontAwesome:(NSString *)iconName textColor:(UIColor *)textColor target:(id)target action:(SEL)action withFrame:(CGRect)buttonFrame
 {
     //Define button
     UIButton *button = [[UIButton alloc] initWithFrame:buttonFrame];
@@ -367,6 +513,9 @@
 
     //Set FontAwesome icon
     [button setTitle:[NSString fontAwesomeIconStringForIconIdentifier:iconName] forState:UIControlStateNormal];
+
+    //Set textColor
+    [button setTitleColor:textColor forState:UIControlStateNormal];
     
     //Define action of button
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
@@ -394,10 +543,10 @@
 {
     NSLog(@"Draw!");
     [super drawRect:rect];
-    [self drawBackgroundGradientInRect:rect FromColor:self.gradientColor1 toColor:self.gradientColor2];
+    [self drawBackgroundGradientInRect:rect FromColor:self.gradientColorTop toColor:self.gradientColorBottom];
 }
 
-- (void)drawBackgroundGradientInRect:(CGRect)rect FromColor:(UIColor*)color1 toColor:(UIColor*)color2
+- (void)drawBackgroundGradientInRect:(CGRect)rect FromColor:(UIColor*)colorTop toColor:(UIColor*)colorBottom
 {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSaveGState(ctx);
@@ -408,8 +557,8 @@
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGFloat locations[] = { 0.0, 1.0 };
     
-    CGColorRef startColor = color1.CGColor;
-    CGColorRef endColor = color2.CGColor;
+    CGColorRef startColor = colorTop.CGColor;
+    CGColorRef endColor = colorBottom.CGColor;
     NSArray *colors = [NSArray arrayWithObjects:(__bridge id)startColor, (__bridge id)endColor, nil];
     
     CGGradientRef gradient = CGGradientCreateWithColors(colorSpace,
@@ -425,17 +574,24 @@
     CGContextRestoreGState(ctx);
 }
 
-- (void)drawBackgroundGradientInButton:(UIButton *)button withColor1:(UIColor *)color1 andColor2:(UIColor *)color2
+- (void)drawBackgroundGradientInButton:(UIButton *)button withColorTop:(UIColor *)colorTop andColorBottom:(UIColor *)colorBottom
 {
     CAGradientLayer *layer = [CAGradientLayer layer];
     NSArray *colors = [NSArray arrayWithObjects:
-                       (id)color1.CGColor,
-                       (id)color2.CGColor,
+                       (id)colorTop.CGColor,
+                       (id)colorBottom.CGColor,
                        nil];
     [layer setColors:colors];
     [layer setFrame:button.bounds];
     [button.layer insertSublayer:layer atIndex:0];
     button.clipsToBounds = YES;
+    
+//    CALayer *leftBorder = [CALayer layer];
+//    leftBorder.borderColor = [UIColor blackColor].CGColor;
+//    leftBorder.borderWidth = 1;
+//    leftBorder.frame = CGRectMake(0, -1, button.frame.size.width, button.frame.size.height+2);
+//    
+//    [button.layer addSublayer:leftBorder];
 }
 
 @end
